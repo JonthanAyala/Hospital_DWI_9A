@@ -85,7 +85,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setUsername("admin");
             admin.setEmail("admin@hospital.com");
             admin.setPhone("1234567890");
-            admin.setPassword(passwordEncoder.encode("root"));
+            admin.setPassword(passwordEncoder.encode("root123"));
             admin.setRol(adminRole);
             admin.setFloor(floor1);
             userRepository.save(admin);
@@ -98,7 +98,7 @@ public class DataInitializer implements CommandLineRunner {
             adrian.setUsername("adrian");
             adrian.setEmail("adrian@hospital.com");
             adrian.setPhone("1234567891");
-            adrian.setPassword(passwordEncoder.encode("root"));
+            adrian.setPassword(passwordEncoder.encode("root123"));
             adrian.setRol(secretariaRole);
             adrian.setFloor(floor1);
             userRepository.save(adrian);
@@ -111,7 +111,7 @@ public class DataInitializer implements CommandLineRunner {
             isai.setUsername("isai");
             isai.setEmail("isai@hospital.com");
             isai.setPhone("1234567892");
-            isai.setPassword(passwordEncoder.encode("root"));
+            isai.setPassword(passwordEncoder.encode("root123"));
             isai.setRol(secretariaRole);
             isai.setFloor(floor1);
             userRepository.save(isai);
@@ -124,7 +124,7 @@ public class DataInitializer implements CommandLineRunner {
             jassiel.setUsername("jassiel");
             jassiel.setEmail("jassiel@hospital.com");
             jassiel.setPhone("1234567893");
-            jassiel.setPassword(passwordEncoder.encode("root"));
+            jassiel.setPassword(passwordEncoder.encode("root123"));
             jassiel.setRol(enfermeraRole);
             jassiel.setFloor(floor2);
             userRepository.save(jassiel);
@@ -137,7 +137,7 @@ public class DataInitializer implements CommandLineRunner {
             ayala.setUsername("ayala");
             ayala.setEmail("ayala@hospital.com");
             ayala.setPhone("1234567894");
-            ayala.setPassword(passwordEncoder.encode("root"));
+            ayala.setPassword(passwordEncoder.encode("root123"));
             ayala.setRol(enfermeraRole);
             ayala.setFloor(floor2);
             userRepository.save(ayala);
