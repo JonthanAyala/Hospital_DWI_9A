@@ -17,67 +17,76 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar si hay un usuario logueado al cargar la aplicación
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (token && userData) {
-      try {
-        setUser(JSON.parse(userData));
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+    const checkUser = () => {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+
+      if (token && userData) {
+        try {
+          setUser(JSON.parse(userData));
+        } catch (error) {
+          console.error('Error al parsear el usuario:', error);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    checkUser();
   }, []);
 
   const login = async (credentials) => {
     try {
       const response = await axiosInstance.post('/auth', credentials);
-      const token = response.data.data; // El token está en data.data
-      
-      if (!token) {
-        throw new Error('No se recibió token del servidor');
-      }
-      
-      // Guardar el token
+      const token = response.data?.data;
+
+      if (!token) throw new Error('Token no recibido del servidor');
+
+      // Guardar el token en localStorage
       localStorage.setItem('token', token);
-      
-      // Decodificar el JWT para obtener información básica del usuario
-      try {
-        const decodedToken = jwtDecode(token);
-        const username = decodedToken.sub; // El username está en 'sub'
-        const roleName = decodedToken.role; // El rol está en 'role'
-        
-        // Crear un objeto de usuario básico con la información del token
-        const userData = {
-          username: username,
-          token: token,
-          rol: {
-            name: roleName
-          }
-        };
-        
-        localStorage.setItem('user', JSON.stringify(userData));
-        setUser(userData);
-        
-        return { success: true, user: userData };
-      } catch (tokenError) {
-        console.error('Error decodificando token:', tokenError);
-        localStorage.removeItem('token');
-        return { 
-          success: false, 
-          message: 'Error procesando el token de autenticación' 
-        };
-      }
-      
+
+      // Decodificar el token
+      const decodedToken = jwtDecode(token);
+      const username = decodedToken.sub;
+      const roleName = decodedToken.role;
+
+      // Obtener los datos del usuario por username
+      const userResponse = await axiosInstance.get(`/users?username=${username}`);
+const usersArray = Array.isArray(userResponse.data?.data) ? userResponse.data.data : [];
+const userInfo = usersArray.find(u => u.username === username);
+
+      // ⚠️ Verifica si se encontró el usuario correctamente
+      if (!userInfo) throw new Error('Usuario no encontrado');
+
+      // 💾 Aquí armamos el objeto completo con piso incluido
+      const userData = {
+        id: userInfo.id,
+        name: userInfo.name,
+        username: userInfo.username,
+        email: userInfo.email,
+        phone: userInfo.phone,
+        rol: userInfo.rol || { name: roleName },
+        floor: userInfo.floor || null, // 💥 ESTE CAMPO ES CLAVE
+        token
+      };
+
+      // Guardar el usuario completo
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+
+      return { success: true, user: userData };
+
     } catch (error) {
       console.error('Error en login:', error);
-      return { 
-        success: false, 
-        message: error.response?.data?.message || 'Error de autenticación' 
+
+      // Limpiar almacenamiento local si falla
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error de autenticación'
       };
     }
   };
@@ -108,7 +117,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

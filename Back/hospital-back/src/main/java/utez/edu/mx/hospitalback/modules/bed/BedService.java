@@ -75,6 +75,57 @@ public class BedService {
     }
 
     @Transactional(rollbackFor = {SQLException.class, Exception.class})
+    public APIResponse updateBed(Long id, RegisterBedDTO payload) {
+        try {
+            Bed bed = bedRepository.findById(id).orElse(null);
+            if (bed == null)
+                return new APIResponse("Cama no encontrada", false, HttpStatus.NOT_FOUND);
+
+            // Verificar si el nuevo identificador ya existe (excepto si es el mismo)
+            if (!bed.getIdentifier().equals(payload.getIdentifier()) &&
+                    bedRepository.existsByIdentifier(payload.getIdentifier())) {
+                return new APIResponse("Ya existe otra cama con ese identificador", false, HttpStatus.BAD_REQUEST);
+            }
+
+            Floor floor = floorRepository.findById(payload.getFloorId()).orElse(null);
+            if (floor == null)
+                return new APIResponse("El piso especificado no existe", false, HttpStatus.BAD_REQUEST);
+
+            bed.setIdentifier(payload.getIdentifier());
+            bed.setFloor(floor);
+
+            bedRepository.save(bed);
+            return new APIResponse("Cama actualizada exitosamente", null, false, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new APIResponse("Error al actualizar cama", false, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional(rollbackFor = {SQLException.class, Exception.class})
+    public APIResponse deleteBed(Long id) {
+        try {
+            Bed bed = bedRepository.findById(id).orElse(null);
+            if (bed == null)
+                return new APIResponse("Cama no encontrada", false, HttpStatus.NOT_FOUND);
+
+            if (bed.getIsOccupied())
+                return new APIResponse("No puedes eliminar una cama ocupada", false, HttpStatus.BAD_REQUEST);
+
+            // Verificar si está asignada a alguna enfermera
+            if (userHasBedsRepository.existsByBedId(bed.getId()))
+                return new APIResponse("No puedes eliminar una cama asignada", false, HttpStatus.BAD_REQUEST);
+
+            bedRepository.delete(bed);
+            return new APIResponse("Cama eliminada exitosamente", null, false, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new APIResponse("Error al eliminar cama", false, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @Transactional(rollbackFor = {SQLException.class, Exception.class})
     public APIResponse assignBedToNurse(AssignBedDTO payload, Long userFloorId) {
         try {
             User nurse = userRepository.findById(payload.getNurseId()).orElse(null);

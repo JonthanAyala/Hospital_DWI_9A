@@ -15,10 +15,10 @@
 }
 
 .modal-content {
-  background: linear-gradient(135deg, #f8fafc 80%, #28fa15 100%);
+  background: linear-gradient(135deg, #f8fafc 80%, #facc15 100%);
   border-radius: 10px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 1.5px 0 #28fa15;
-  border: 2px solid #28fa15;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 1.5px 0 #facc15;
+  border: 2px solid #facc15;
   padding: 40px 48px;
   min-width: 480px;
   max-width: 600px;
@@ -36,7 +36,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 18px;
-  border-bottom: 1.5px solid #28fa15;
+  border-bottom: 1.5px solid #facc15;
   padding-bottom: 8px;
 }
 
@@ -45,7 +45,7 @@
   border: none;
   font-size: 1.8rem;
   cursor: pointer;
-  color: #28fa15;
+  color: #d32f2f;
   transition: background 0.2s, color 0.2s, box-shadow 0.2s;
   padding: 4px 8px;
   border-radius: 50%;
@@ -53,9 +53,9 @@
 }
 
 .modal-close:hover {
-  background: #eaffea;
-  color: #27ae60;
-  box-shadow: 0 2px 8px rgba(40,250,21,0.12);
+  background: #ffeaea;
+  color: #b71c1c;
+  box-shadow: 0 2px 8px rgba(211,47,47,0.12);
 }
 
 
@@ -71,8 +71,8 @@
 }
 
 .submit-error {
-  color: #27ae60;
-  background: #eaffea;
+  color: #d32f2f;
+  background: #ffeaea;
   padding: 8px;
   border-radius: 4px;
   margin-bottom: 8px;

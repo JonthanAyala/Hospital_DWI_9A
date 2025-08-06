@@ -89,6 +89,41 @@
   color: #666;
 }
 
+/* Botones de acciones para la tabla de usuarios */
+.edit-btn {
+  background-color: #facc15;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(250, 204, 21, 0.12);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.edit-btn:hover {
+  background-color: #eab308;
+  box-shadow: 0 4px 16px rgba(250, 204, 21, 0.18);
+}
+
+.delete-btn {
+  background-color: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.12);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.delete-btn:hover {
+  background-color: #dc2626;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.18);
+}
+
 @media (max-width: 768px) {
   .admin-dashboard {
     padding: 15px;

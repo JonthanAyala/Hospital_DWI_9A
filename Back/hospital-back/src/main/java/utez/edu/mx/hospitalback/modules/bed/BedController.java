@@ -65,6 +65,21 @@ public class BedController {
         return new ResponseEntity<>(response, response.getStatus());
     }
 
+    @PutMapping("/{id}")
+    @Operation(summary = "Actualizar cama", description = "Permite actualizar el identificador de una cama o cambiarla de piso")
+    public ResponseEntity<APIResponse> updateBed(@PathVariable Long id, @Valid @RequestBody RegisterBedDTO payload) {
+        APIResponse response = bedService.updateBed(id, payload);
+        return new ResponseEntity<>(response, response.getStatus());
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Eliminar cama", description = "Elimina una cama si no está ocupada ni asignada")
+    public ResponseEntity<APIResponse> deleteBed(@PathVariable Long id) {
+        APIResponse response = bedService.deleteBed(id);
+        return new ResponseEntity<>(response, response.getStatus());
+    }
+
+
     @PostMapping("/assign")
     @Operation(summary = "Asignar cama a enfermera", description = "Permite a la secretaria asignar una cama a una enfermera de su piso")
     @ApiResponses({

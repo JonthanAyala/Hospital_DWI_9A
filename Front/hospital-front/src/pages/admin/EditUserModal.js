@@ -2,19 +2,18 @@ import React, { useState, useEffect } from 'react';
 import FormField from '../../components/FormField';
 import Button from '../../components/Button';
 import { validateField } from '../../utils/validations';
-import { floorService, userService } from '../../services/api';
-import './RegisterUserModal.css';
+import { userService, floorService } from '../../services/api';
+import './EditUserModal.css';
 
-const RegisterUserModal = ({ onClose, onUserRegistered }) => {
+const EditUserModal = ({ user, onClose, onUserUpdated }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    rolId: '',
-    floorId: '',
-    phone: ''
+    name: user?.name || '',
+    username: user?.username || '',
+    email: user?.email || '',
+    rolId: user?.rol?.id || '',
+    floorId: user?.floor?.id || '',
+    phone: user?.phone || '',
+    password: ''
   });
 
   const [errors, setErrors] = useState({});
@@ -31,7 +30,7 @@ const RegisterUserModal = ({ onClose, onUserRegistered }) => {
       const response = await floorService.getAllFloors();
       setFloors(response?.data || []);
     } catch (error) {
-      console.error('Error cargando pisos:', error);
+      console.error('Error cargando pisos', error);
       setFloors([]);
     }
   };
@@ -62,6 +61,7 @@ const RegisterUserModal = ({ onClose, onUserRegistered }) => {
         [name]: ''
       }));
     }
+
     setSubmitError('');
   };
 
@@ -72,11 +72,6 @@ const RegisterUserModal = ({ onClose, onUserRegistered }) => {
     if (usernameErrors.length > 0) newErrors.username = usernameErrors[0];
     const emailErrors = validateField(formData.email, 'email', true);
     if (emailErrors.length > 0) newErrors.email = emailErrors[0];
-    if (!formData.password) newErrors.password = 'La contraseña es obligatoria';
-    else if (formData.password.length < 6)
-      newErrors.password = 'Debe tener al menos 6 caracteres';
-    if (formData.password !== formData.confirmPassword)
-      newErrors.confirmPassword = 'Las contraseñas no coinciden';
     if (!formData.rolId) newErrors.rolId = 'Debe seleccionar un rol';
     if ((formData.rolId == 2 || formData.rolId == 3) && !formData.floorId)
       newErrors.floorId = 'Debe seleccionar un piso';
@@ -95,20 +90,23 @@ const RegisterUserModal = ({ onClose, onUserRegistered }) => {
     setSubmitError('');
 
     try {
-      const { confirmPassword, ...userData } = formData;
       const payload = {
-        ...userData,
-        rolId: parseInt(userData.rolId),
-        floorId: userData.floorId ? parseInt(userData.floorId) : null
-      };
-      await userService.registerUser(payload);
-      onUserRegistered();
-      onClose();
-      alert('Usuario registrado exitosamente');
+  id: user.id, // 👈 Esto es lo que faltaba
+  ...formData,
+  rolId: parseInt(formData.rolId),
+  floorId: formData.floorId ? parseInt(formData.floorId) : null
+};
+
+
+      await userService.updateUser(user.id, payload);
+onUserUpdated(); // Refresca la lista
+onClose();       // ✅ Cierra el modal automáticamente
+alert('Usuario actualizado exitosamente');
+
     } catch (error) {
-      console.error('Error al registrar usuario:', error);
+      console.error('Error al actualizar usuario:', error);
       setSubmitError(
-        error.response?.data?.message || 'Error inesperado al registrar'
+        error.response?.data?.message || 'Error inesperado al actualizar'
       );
     } finally {
       setLoading(false);
@@ -125,28 +123,51 @@ const RegisterUserModal = ({ onClose, onUserRegistered }) => {
     <div className="modal-backdrop" onClick={handleBackdropClick}>
       <div className="modal-content">
         <div className="modal-header">
-          <h2>➕ Registrar Nuevo Usuario</h2>
-          <button className="modal-close" onClick={onClose}>✕</button>
+          <h2>✏️ Editar Usuario</h2>
+          <button className="modal-close" onClick={onClose}>
+            ✕
+          </button>
         </div>
         <form onSubmit={handleSubmit} className="modal-form">
           <FormField label="Nombre Completo" name="name" value={formData.name} onChange={handleChange} error={errors.name} required />
           <FormField label="Nombre de Usuario" name="username" value={formData.username} onChange={handleChange} error={errors.username} required />
           <FormField label="Email" type="email" name="email" value={formData.email} onChange={handleChange} error={errors.email} required />
+
           <div className="form-row">
-            <FormField label="Contraseña" type="password" name="password" value={formData.password} onChange={handleChange} error={errors.password} required />
-            <FormField label="Confirmar Contraseña" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} error={errors.confirmPassword} required />
-          </div>
-          <div className="form-row">
-            <FormField label="Rol" type="select" name="rolId" value={formData.rolId} onChange={handleChange} error={errors.rolId} options={roleOptions} required />
+            <FormField
+              label="Rol"
+              type="select"
+              name="rolId"
+              value={formData.rolId}
+              onChange={handleChange}
+              error={errors.rolId}
+              options={roleOptions}
+              required
+            />
             {(formData.rolId == 2 || formData.rolId == 3) && (
-              <FormField label="Piso Asignado" type="select" name="floorId" value={formData.floorId} onChange={handleChange} error={errors.floorId} options={floorOptions} required />
+              <FormField
+                label="Piso Asignado"
+                type="select"
+                name="floorId"
+                value={formData.floorId}
+                onChange={handleChange}
+                error={errors.floorId}
+                options={floorOptions}
+                required
+              />
             )}
             <FormField label="Teléfono" name="phone" value={formData.phone} onChange={handleChange} error={errors.phone} required />
           </div>
+
           {submitError && <div className="submit-error">{submitError}</div>}
+
           <div className="modal-actions">
-            <Button type="button" variant="secondary" onClick={onClose} disabled={loading}>Cancelar</Button>
-            <Button type="submit" variant="primary" loading={loading}>Registrar Usuario</Button>
+            <Button type="button" variant="secondary" onClick={onClose} disabled={loading}>
+              Cancelar
+            </Button>
+            <Button type="submit" variant="primary" loading={loading}>
+              Actualizar Usuario
+            </Button>
           </div>
         </form>
       </div>
@@ -154,4 +175,4 @@ const RegisterUserModal = ({ onClose, onUserRegistered }) => {
   );
 };
 
-export default RegisterUserModal;
+export default EditUserModal;

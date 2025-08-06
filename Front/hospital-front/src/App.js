@@ -14,6 +14,9 @@ import './App.css';
 
 function App() {
   const { isAuthenticated, user, loading } = useAuth();
+  console.log('Auth status:', { isAuthenticated, user, loading });
+
+  
 
   if (loading) {
     return (
@@ -22,6 +25,15 @@ function App() {
       </div>
     );
   }
+  
+  if (!isAuthenticated) {
+  return (
+    <Routes>
+      <Route path="/*" element={<Login />} />
+    </Routes>
+  );
+}
+
 
   return (
     <div className="App">
@@ -43,31 +55,32 @@ function App() {
 
         {/* Rutas protegidas por rol */}
         <Route 
-          path="/admin/*" 
-          element={
-            <PrivateRoute allowedRoles={['ROLE_ADMIN']}>
-              <AdminDashboard />
-            </PrivateRoute>
-          } 
-        />
+  path="/admin/*" 
+  element={
+    <PrivateRoute allowedRoles={['ADMIN']}>
+      <AdminDashboard />
+    </PrivateRoute>
+  } 
+/>
 
-        <Route 
-          path="/secretaria/*" 
-          element={
-            <PrivateRoute allowedRoles={['ROLE_SECRETARIA']}>
-              <SecretariaDashboard />
-            </PrivateRoute>
-          } 
-        />
+<Route 
+  path="/secretaria/*" 
+  element={
+    <PrivateRoute allowedRoles={['SECRETARIA']}>
+      <SecretariaDashboard />
+    </PrivateRoute>
+  } 
+/>
 
-        <Route 
-          path="/enfermera/*" 
-          element={
-            <PrivateRoute allowedRoles={['ROLE_ENFERMERA']}>
-              <EnfermeraDashboard />
-            </PrivateRoute>
-          } 
-        />
+<Route 
+  path="/enfermera/*" 
+  element={
+    <PrivateRoute allowedRoles={['ENFERMERA']}>
+      <EnfermeraDashboard />
+    </PrivateRoute>
+  } 
+/>
+
 
         {/* Ruta por defecto */}
         <Route 

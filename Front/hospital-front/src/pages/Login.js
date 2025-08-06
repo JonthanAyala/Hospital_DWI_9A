@@ -90,18 +90,19 @@ const Login = () => {
         const userRole = result.user?.rol?.name;
         
         switch (userRole) {
-          case 'ROLE_ADMIN':
-            navigate('/admin');
-            break;
-          case 'ROLE_SECRETARIA':
-            navigate('/secretaria');
-            break;
-          case 'ROLE_ENFERMERA':
-            navigate('/enfermera');
-            break;
-          default:
-            navigate('/');
-        }
+  case 'ADMIN':
+    navigate('/admin');
+    break;
+  case 'SECRETARIA':
+    navigate('/secretaria');
+    break;
+  case 'ENFERMERA':
+    navigate('/enfermera');
+    break;
+  default:
+    navigate('/');
+}
+
       } else {
         // Manejar diferentes tipos de errores de login
         if (result.message) {

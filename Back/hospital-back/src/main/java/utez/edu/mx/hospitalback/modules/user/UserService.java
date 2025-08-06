@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import utez.edu.mx.hospitalback.modules.bed.BedRepository;
 import utez.edu.mx.hospitalback.modules.floor.Floor;
 import utez.edu.mx.hospitalback.modules.floor.FloorRepository;
 import utez.edu.mx.hospitalback.modules.user.dto.RegisterUserDTO;
+import utez.edu.mx.hospitalback.modules.user.dto.UpdateUserDTO;
 import utez.edu.mx.hospitalback.modules.userhasbeds.UserHasBedsRepository;
 import utez.edu.mx.hospitalback.utils.APIResponse;
 import utez.edu.mx.hospitalback.utils.PasswordEncoder;
@@ -27,6 +29,10 @@ public class UserService {
 
     @Autowired
     private UserHasBedsRepository userHasBedsRepository;
+
+    @Autowired
+    private BedRepository bedRepository;
+
 
     @Transactional(rollbackFor = {SQLException.class, Exception.class})
     public APIResponse registerUser(RegisterUserDTO payload) {
@@ -70,6 +76,80 @@ public class UserService {
             return new APIResponse("Error al registrar usuario", false, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @Transactional(rollbackFor = {SQLException.class, Exception.class})
+    public APIResponse updateUser(UpdateUserDTO dto) {
+        try {
+            User user = userRepository.findById(dto.getId()).orElse(null);
+            if (user == null) {
+                return new APIResponse("Usuario no encontrado", false, HttpStatus.NOT_FOUND);
+            }
+
+            // Validaciones para email y username únicos (si cambiaron)
+            if (!user.getUsername().equals(dto.getUsername()) &&
+                    userRepository.findByUsername(dto.getUsername()).isPresent()) {
+                return new APIResponse("El nombre de usuario ya está en uso", false, HttpStatus.BAD_REQUEST);
+            }
+
+            if (!user.getEmail().equals(dto.getEmail()) &&
+                    userRepository.findByEmail(dto.getEmail()).isPresent()) {
+                return new APIResponse("El correo electrónico ya está en uso", false, HttpStatus.BAD_REQUEST);
+            }
+
+            Rol rol = rolRepository.findById(dto.getRolId()).orElse(null);
+            Floor floor = floorRepository.findById(dto.getFloorId()).orElse(null);
+
+            if (rol == null || floor == null) {
+                return new APIResponse("Rol o piso no válido", false, HttpStatus.BAD_REQUEST);
+            }
+
+            user.setName(dto.getName());
+            user.setUsername(dto.getUsername());
+            user.setEmail(dto.getEmail());
+            user.setPhone(dto.getPhone());
+            user.setRol(rol);
+            user.setFloor(floor);
+
+            if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+                user.setPassword(PasswordEncoder.encodePassword(dto.getPassword()));
+            }
+
+            userRepository.save(user);
+            return new APIResponse("Usuario actualizado exitosamente", null, false, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new APIResponse("Error al actualizar usuario", false, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional(rollbackFor = {SQLException.class, Exception.class})
+    public APIResponse deleteUser(Long id) {
+        try {
+            User user = userRepository.findById(id).orElse(null);
+            if (user == null) {
+                return new APIResponse("Usuario no encontrado", false, HttpStatus.NOT_FOUND);
+            }
+
+            // Validación: si es enfermera y tiene camas asignadas, no se puede eliminar
+            if ("ENFERMERA".equals(user.getRol().getName()) && !userHasBedsRepository.findByUserId(id).isEmpty()) {
+                return new APIResponse("No se puede eliminar una enfermera con camas asignadas", false, HttpStatus.BAD_REQUEST);
+            }
+
+            // Validación: si tiene rol SECRETARIA y hay camas en su piso
+            if ("SECRETARIA".equals(user.getRol().getName()) && !bedRepository.findByFloorId(user.getFloor().getId()).isEmpty()) {
+                return new APIResponse("No se puede eliminar una secretaria si existen camas en su piso", false, HttpStatus.BAD_REQUEST);
+            }
+
+            userRepository.delete(user);
+            return new APIResponse("Usuario eliminado correctamente", null, false, HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new APIResponse("Error al eliminar usuario", false, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 
     @Transactional(readOnly = true)
     public APIResponse getNursesByFloor(Long floorId) {

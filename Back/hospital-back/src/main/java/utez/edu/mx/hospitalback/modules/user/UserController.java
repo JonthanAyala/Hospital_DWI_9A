@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import utez.edu.mx.hospitalback.modules.user.dto.RegisterUserDTO;
+import utez.edu.mx.hospitalback.modules.user.dto.UpdateUserDTO;
 import utez.edu.mx.hospitalback.utils.APIResponse;
 
 @RestController
@@ -38,6 +39,37 @@ public class UserController {
         APIResponse response = userService.registerUser(payload);
         return new ResponseEntity<>(response, response.getStatus());
     }
+
+    @PutMapping("/update/{id}")
+    @Operation(summary = "Actualizar usuario", description = "Permite al administrador editar datos de un usuario")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuario actualizado exitosamente",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = APIResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o en conflicto"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+            @ApiResponse(responseCode = "403", description = "No tienes permisos para realizar esta acción")
+    })
+    public ResponseEntity<APIResponse> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateUserDTO dto
+    ) {
+        dto.setId(id); // Aseguramos que el ID venga desde la URL
+        APIResponse response = userService.updateUser(dto);
+        return new ResponseEntity<>(response, response.getStatus());
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @Operation(summary = "Eliminar usuario", description = "Permite al administrador eliminar un usuario si no tiene relaciones activas")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuario eliminado correctamente"),
+            @ApiResponse(responseCode = "400", description = "No se puede eliminar usuario por relaciones existentes"),
+            @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
+    public ResponseEntity<APIResponse> deleteUser(@PathVariable Long id) {
+        APIResponse response = userService.deleteUser(id);
+        return new ResponseEntity<>(response, response.getStatus());
+    }
+
 
     @GetMapping("/nurses")
     @Operation(summary = "Obtener enfermeras por piso", description = "Permite a la secretaria ver las enfermeras de su piso")
