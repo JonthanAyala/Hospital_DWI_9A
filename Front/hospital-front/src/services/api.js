@@ -138,6 +138,7 @@ export const roleService = {
 };
 
 // Servicios de Pisos
+// Servicios de Pisos
 export const floorService = {
   getAllFloors: async () => {
     const response = await axiosInstance.get('/floors');
@@ -145,15 +146,16 @@ export const floorService = {
   },
   createFloor: async (data) => {
     const response = await axiosInstance.post('/floors', data);
-    return response.data;
+    return response; // devolvemos el response completo
   },
   updateFloor: async (id, data) => {
     const response = await axiosInstance.put(`/floors/${id}`, data);
-    return response.data;
+    return response; // devolvemos el response completo
   },
   deleteFloor: async (id) => {
     const response = await axiosInstance.delete(`/floors/${id}`);
     return response.data;
   }
 };
+
 

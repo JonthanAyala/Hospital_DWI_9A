@@ -46,9 +46,10 @@ const AdminDashboard = () => {
   const fetchFloors = async () => {
     try {
       const response = await floorService.getAllFloors();
-      setFloors(response.data);
+      setFloors(response.data ?? []);
     } catch (error) {
       console.error('Error al obtener pisos:', error);
+      setFloors([]);
     }
   };
 
@@ -60,7 +61,7 @@ const AdminDashboard = () => {
   const handleFloorSaved = () => {
     setShowFloorModal(false);
     setFloorToEdit(null);
-    fetchFloors();
+    fetchFloors(); // Refresca pisos automáticamente
   };
 
   const handleDeleteUser = async (userId) => {
@@ -171,12 +172,12 @@ const AdminDashboard = () => {
         )}
         <div className="dashboard-content">
           <div className="users-section">
-            <h2>Lista de Usuarios ({users.length})</h2>
+            <h2>Lista de Usuarios ({users?.length ?? 0})</h2>
             <Table columns={userColumns} data={users} />
           </div>
           <div className="floors-section mt-10">
             <div className="dashboard-actions">
-              <h2 className="text-lg font-bold">Pisos Registrados ({floors.length})</h2>
+              <h2 className="text-lg font-bold">Pisos Registrados ({floors?.length ?? 0})</h2>
               <Button variant="secondary" onClick={() => { setFloorToEdit(null); setShowFloorModal(true); }}>
                 ➕ Registrar Piso
               </Button>
@@ -202,7 +203,7 @@ const AdminDashboard = () => {
         <FloorModal
           floor={floorToEdit}
           onClose={() => { setShowFloorModal(false); setFloorToEdit(null); }}
-          onSave={handleFloorSaved}
+          onSaved={handleFloorSaved}
         />
       )}
     </>

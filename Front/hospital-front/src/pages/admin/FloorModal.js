@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import FormField from '../../components/FormField';
 import Button from '../../components/Button';
 import { floorService } from '../../services/api';
@@ -10,23 +10,39 @@ const FloorModal = ({ floor, onClose, onSaved }) => {
   });
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setSubmitError('');
+    setSuccessMessage('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setSubmitError('');
+    setSuccessMessage('');
+
     try {
       if (floor) {
         await floorService.updateFloor(floor.id, formData);
       } else {
         await floorService.createFloor(formData);
       }
-      onSaved();
+
+      setSuccessMessage('✅ Piso guardado correctamente');
+
+      // Llamar a onSaved si existe y es función
+      if (typeof onSaved === 'function') {
+        onSaved();
+      } else {
+        // Si no hay onSaved, simplemente cerrar modal después de un momento
+        setTimeout(() => {
+          onClose();
+        }, 800);
+      }
     } catch (error) {
       setSubmitError('Error al guardar el piso');
     } finally {
@@ -64,7 +80,10 @@ const FloorModal = ({ floor, onClose, onSaved }) => {
             placeholder="Ej: Piso 1 - Administración"
             required
           />
+
           {submitError && <div className="submit-error">{submitError}</div>}
+          {successMessage && <div className="submit-success">{successMessage}</div>}
+
           <div className="modal-actions">
             <Button type="button" variant="secondary" onClick={onClose} disabled={loading}>
               Cancelar

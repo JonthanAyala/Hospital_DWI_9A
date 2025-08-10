@@ -16,7 +16,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
 
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -72,9 +72,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     setLoading(true);
     setLoginError('');
@@ -86,30 +84,23 @@ const Login = () => {
       });
 
       if (result.success) {
-        // Redirigir según el rol del usuario retornado por el login
         const userRole = result.user?.rol?.name;
-        
-        switch (userRole) {
-  case 'ADMIN':
-    navigate('/admin');
-    break;
-  case 'SECRETARIA':
-    navigate('/secretaria');
-    break;
-  case 'ENFERMERA':
-    navigate('/enfermera');
-    break;
-  default:
-    navigate('/');
-}
 
-      } else {
-        // Manejar diferentes tipos de errores de login
-        if (result.message) {
-          setLoginError(result.message);
-        } else {
-          setLoginError('Usuario o contraseña incorrectos');
+        switch (userRole) {
+          case 'ADMIN':
+            navigate('/admin');
+            break;
+          case 'SECRETARIA':
+            navigate('/secretaria');
+            break;
+          case 'ENFERMERA':
+            navigate('/enfermera');
+            break;
+          default:
+            navigate('/');
         }
+      } else {
+        setLoginError(result.message || 'Usuario o contraseña incorrectos');
       }
     } catch (error) {
       console.error('Error de login:', error);
