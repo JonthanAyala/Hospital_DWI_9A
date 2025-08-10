@@ -37,7 +37,7 @@ public class MainSecurity {
         http.csrf(c -> c.disable()).cors(c-> c.configurationSource(corsRegistry()))
                 .authorizeHttpRequests(auth ->auth
                         .requestMatchers("/api/users/register").hasRole("ADMIN")
-                        .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "SECRETARIA")
+                        .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "SECRETARIA", "ENFERMERA")
                         .requestMatchers("/api/beds/**").hasAnyRole("SECRETARIA", "ENFERMERA")
                         .requestMatchers("/api/patients/**").hasRole("ENFERMERA")
                         .requestMatchers(HttpMethod.POST,"/api/auth/**").permitAll()

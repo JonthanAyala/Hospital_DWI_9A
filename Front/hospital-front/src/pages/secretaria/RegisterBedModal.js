@@ -21,10 +21,20 @@ const RegisterBedModal = ({ onClose, onBedRegistered }) => {
 
   const fetchFloors = async () => {
     try {
-      const floorsData = await floorService.getAllFloors();
-      setFloors(floorsData);
+      const response = await floorService.getAllFloors();
+      
+      // La respuesta de axios.get se encuentra en la propiedad 'data'
+      // Verificamos si response.data es un array antes de usarlo.
+      const floorsData = Array.isArray(response.data) ? response.data : [];
+
+      if (floorsData.length > 0) {
+        setFloors(floorsData);
+      } else {
+        console.warn('API de pisos devolvió un array vacío o un formato inesperado.', response.data);
+      }
     } catch (error) {
       console.error('Error fetching floors:', error);
+      // Fallback en caso de error
       setFloors([
         { id: 1, name: 'P1' },
         { id: 2, name: 'P2' },
