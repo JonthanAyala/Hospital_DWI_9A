@@ -21,10 +21,19 @@ public class UDService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        User found = userRepository.findByUsername(username).orElse(null);
-        if (found == null) throw new UsernameNotFoundException("Usuario no encontrado");
+        System.out.println("Buscando usuario por username: " + username);
 
-        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_"+found.getRol().getName());
+        User found = userRepository.findByUsername(username).orElse(null);
+        if (found == null) {
+            System.out.println("Usuario no encontrado: " + username);
+            throw new UsernameNotFoundException("Usuario no encontrado");
+        }
+
+        System.out.println("Usuario encontrado: " + found.getUsername());
+        System.out.println("Rol del usuario: " + found.getRol().getName());
+
+        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + found.getRol().getName());
+        System.out.println("Authority creada: " + authority.getAuthority());
 
         return new org.springframework.security.core.userdetails.User(
                 found.getUsername(),
