@@ -40,6 +40,9 @@ public class JWTFilter extends OncePerRequestFilter {
             UserDetails userDetails = this.udService.loadUserByUsername(username);
 
             if (jwtUtils.validateToken(token, userDetails)) {
+                System.out.println("Roles desde UserDetails:");
+                userDetails.getAuthorities().forEach(auth -> System.out.println(auth.getAuthority()));
+
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()
                 );
@@ -47,6 +50,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
+
         }
         filterChain.doFilter(request, response);
     }

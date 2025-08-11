@@ -21,11 +21,20 @@ const RegisterBedModal = ({ onClose, onBedRegistered }) => {
 
   const fetchFloors = async () => {
     try {
-      const floorsData = await floorService.getAllFloors();
-      setFloors(floorsData);
+      const response = await floorService.getAllFloors();
+      
+      // La respuesta de axios.get se encuentra en la propiedad 'data'
+      // Verificamos si response.data es un array antes de usarlo.
+      const floorsData = Array.isArray(response.data) ? response.data : [];
+
+      if (floorsData.length > 0) {
+        setFloors(floorsData);
+      } else {
+        console.warn('API de pisos devolvió un array vacío o un formato inesperado.', response.data);
+      }
     } catch (error) {
       console.error('Error fetching floors:', error);
-      // Usar valores por defecto si falla la carga
+      // Fallback en caso de error
       setFloors([
         { id: 1, name: 'P1' },
         { id: 2, name: 'P2' },
@@ -48,7 +57,6 @@ const RegisterBedModal = ({ onClose, onBedRegistered }) => {
       [name]: value
     }));
 
-    // Limpiar errores mientras el usuario escribe
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -61,13 +69,11 @@ const RegisterBedModal = ({ onClose, onBedRegistered }) => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Validar identificador de cama
     const bedIdErrors = validateField(formData.identifier, 'bedIdentifier', true);
     if (bedIdErrors.length > 0) {
       newErrors.identifier = bedIdErrors[0];
     }
 
-    // Validar piso
     if (!formData.floorId) {
       newErrors.floorId = 'Debe seleccionar un piso';
     }
@@ -78,7 +84,7 @@ const RegisterBedModal = ({ onClose, onBedRegistered }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -89,15 +95,15 @@ const RegisterBedModal = ({ onClose, onBedRegistered }) => {
     try {
       await axiosInstance.post('/beds', {
         identifier: formData.identifier,
-        floorId: parseInt(formData.floorId)
+        floorId: parseInt(formData.floorId, 10)
       });
-      
+
       onBedRegistered();
       alert('Cama registrada exitosamente');
     } catch (error) {
       console.error('Error registering bed:', error);
       setSubmitError(
-        error.response?.data?.message || 
+        error.response?.data?.message ||
         'Error al registrar cama. Intente nuevamente.'
       );
     } finally {
@@ -116,9 +122,7 @@ const RegisterBedModal = ({ onClose, onBedRegistered }) => {
       <div className="modal-content">
         <div className="modal-header">
           <h2>🛏️ Registrar Nueva Cama</h2>
-          <button className="modal-close" onClick={onClose}>
-            ✕
-          </button>
+          <button className="modal-close" onClick={onClose}>✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
@@ -144,9 +148,7 @@ const RegisterBedModal = ({ onClose, onBedRegistered }) => {
           />
 
           {submitError && (
-            <div className="submit-error">
-              {submitError}
-            </div>
+            <div className="submit-error">{submitError}</div>
           )}
 
           <div className="modal-actions">
