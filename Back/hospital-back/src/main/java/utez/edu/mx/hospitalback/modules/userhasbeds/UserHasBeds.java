@@ -1,13 +1,19 @@
 package utez.edu.mx.hospitalback.modules.userhasbeds;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import utez.edu.mx.hospitalback.modules.bed.Bed;
+import utez.edu.mx.hospitalback.modules.patient.Patient; // Importa la clase Patient
 import utez.edu.mx.hospitalback.modules.user.User;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_has_beds")
+@Getter
+@Setter
 public class UserHasBeds {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,54 +21,23 @@ public class UserHasBeds {
 
     @ManyToOne
     @JoinColumn(name = "id_user", nullable = false)
+    @JsonManagedReference
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "id_bed", nullable = false)
+    @JsonManagedReference
     private Bed bed;
+
+    // Aquí se agrega la relación con el paciente
+    @ManyToOne
+    @JoinColumn(name = "id_patient", nullable = true) // 'nullable = true' porque una cama puede estar disponible sin un paciente asignado.
+    private Patient patient; // Campo para vincular el paciente
 
     @Column(name = "assigned_date", nullable = false)
     private LocalDateTime assignedDate;
 
     public UserHasBeds() {
         this.assignedDate = LocalDateTime.now();
-    }
-
-    public UserHasBeds(User user, Bed bed) {
-        this.user = user;
-        this.bed = bed;
-        this.assignedDate = LocalDateTime.now();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Bed getBed() {
-        return bed;
-    }
-
-    public void setBed(Bed bed) {
-        this.bed = bed;
-    }
-
-    public LocalDateTime getAssignedDate() {
-        return assignedDate;
-    }
-
-    public void setAssignedDate(LocalDateTime assignedDate) {
-        this.assignedDate = assignedDate;
     }
 }

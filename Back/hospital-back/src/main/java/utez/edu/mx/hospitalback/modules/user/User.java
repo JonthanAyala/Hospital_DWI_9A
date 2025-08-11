@@ -1,13 +1,23 @@
 package utez.edu.mx.hospitalback.modules.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.Getter;
+import lombok.Setter;
 import utez.edu.mx.hospitalback.modules.floor.Floor;
+import utez.edu.mx.hospitalback.modules.userhasbeds.UserHasBeds;
+import utez.edu.mx.hospitalback.modules.user.Rol; // Se corrigió para importar la clase Rol
+
+import java.util.List;
 
 @Entity
 @Table(name = "user")
+@Getter
+@Setter
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,88 +47,18 @@ public class User {
 
     @ManyToOne
     @JoinColumn(name = "id_rol", nullable = false)
-    private Rol rol;
+    @JsonManagedReference
+    private Rol rol; // Se corrigió para usar Rol
 
     @ManyToOne
     @JoinColumn(name = "id_floor", nullable = false)
+    @JsonManagedReference
     private Floor floor;
 
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private List<UserHasBeds> userHasBeds;
+
     public User() {
-    }
-
-    public User(Long id, String name, String username, String email, String phone, String password, Rol rol, Floor floor) {
-        this.id = id;
-        this.name = name;
-        this.username = username;
-        this.email = email;
-        this.phone = phone;
-        this.password = password;
-        this.rol = rol;
-        this.floor = floor;
-    }
-
-    // Getters and setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public Rol getRol() {
-        return rol;
-    }
-
-    public void setRol(Rol rol) {
-        this.rol = rol;
-    }
-
-    public Floor getFloor() {
-        return floor;
-    }
-
-    public void setFloor(Floor floor) {
-        this.floor = floor;
     }
 }

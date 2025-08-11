@@ -15,6 +15,8 @@ import utez.edu.mx.hospitalback.modules.userhasbeds.UserHasBedsRepository;
 import utez.edu.mx.hospitalback.utils.APIResponse;
 
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -124,7 +126,6 @@ public class BedService {
         }
     }
 
-
     @Transactional(rollbackFor = {SQLException.class, Exception.class})
     public APIResponse assignBedToNurse(AssignBedDTO payload, Long userFloorId) {
         try {
@@ -158,14 +159,36 @@ public class BedService {
                 return new APIResponse("Esta cama ya está asignada a otra enfermera", false, HttpStatus.BAD_REQUEST);
             }
 
-            UserHasBeds assignment = new UserHasBeds(nurse, bed);
+            // Lógica corregida para asignar la cama al enfermero
+            UserHasBeds assignment = new UserHasBeds();
+            assignment.setUser(nurse);
+            assignment.setBed(bed);
+            assignment.setAssignedDate(LocalDateTime.now());
             userHasBedsRepository.save(assignment);
+
 
             return new APIResponse("Cama asignada exitosamente", null, false, HttpStatus.OK);
 
         } catch (Exception e) {
             e.printStackTrace();
             return new APIResponse("Error al asignar cama", false, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public APIResponse getAvailableBeds(Long floorId) {
+        try {
+            // Usa el nuevo método del repositorio para obtener las camas disponibles
+            List<Bed> availableBeds = bedRepository.findAvailableBedsByFloor(floorId);
+
+            if (availableBeds.isEmpty()) {
+                // CORRECCIÓN: Si no hay camas, devuelve un APIResponse con un array vacío en 'data'
+                return new APIResponse("No hay camas disponibles en este piso", Collections.emptyList(), false, HttpStatus.OK);
+            }
+            return new APIResponse("Camas disponibles encontradas", availableBeds, false, HttpStatus.OK);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new APIResponse("Error al obtener camas disponibles", false, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

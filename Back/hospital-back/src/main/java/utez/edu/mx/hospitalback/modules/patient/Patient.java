@@ -1,13 +1,19 @@
 package utez.edu.mx.hospitalback.modules.patient;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 import utez.edu.mx.hospitalback.modules.bed.Bed;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "patient")
+@Getter
+@Setter
 public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,65 +23,27 @@ public class Patient {
     @NotBlank(message = "El nombre del paciente es obligatorio")
     private String name;
 
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "medical_history", columnDefinition = "TEXT")
+    private String medicalHistory;
+
     @Column(name = "admission_date", nullable = false)
     private LocalDateTime admissionDate;
 
     @Column(name = "discharge_date")
     private LocalDateTime dischargeDate;
 
-    @OneToOne
-    @JoinColumn(name = "id_bed", nullable = false)
+    // Relación OneToOne con Bed - Lado dueño, mapeado por 'patient'
+    @OneToOne(mappedBy = "patient")
+    @JsonBackReference
     private Bed bed;
 
     public Patient() {
         this.admissionDate = LocalDateTime.now();
-    }
-
-    public Patient(Long id, String name, LocalDateTime admissionDate, LocalDateTime dischargeDate, Bed bed) {
-        this.id = id;
-        this.name = name;
-        this.admissionDate = admissionDate;
-        this.dischargeDate = dischargeDate;
-        this.bed = bed;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public LocalDateTime getAdmissionDate() {
-        return admissionDate;
-    }
-
-    public void setAdmissionDate(LocalDateTime admissionDate) {
-        this.admissionDate = admissionDate;
-    }
-
-    public LocalDateTime getDischargeDate() {
-        return dischargeDate;
-    }
-
-    public void setDischargeDate(LocalDateTime dischargeDate) {
-        this.dischargeDate = dischargeDate;
-    }
-
-    public Bed getBed() {
-        return bed;
-    }
-
-    public void setBed(Bed bed) {
-        this.bed = bed;
     }
 }

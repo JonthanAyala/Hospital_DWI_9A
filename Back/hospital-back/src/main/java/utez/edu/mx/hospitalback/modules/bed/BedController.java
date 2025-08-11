@@ -32,10 +32,10 @@ public class BedController {
     @PostMapping("")
     @Operation(summary = "Registrar cama", description = "Permite a la secretaria registrar nuevas camas en su piso")
     @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Cama registrada exitosamente", 
+            @ApiResponse(responseCode = "201", description = "Cama registrada exitosamente",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = APIResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Datos inválidos o cama ya existe"),
-        @ApiResponse(responseCode = "403", description = "No tienes permisos para realizar esta acción")
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o cama ya existe"),
+            @ApiResponse(responseCode = "403", description = "No tienes permisos para realizar esta acción")
     })
     public ResponseEntity<APIResponse> registerBed(@Valid @RequestBody RegisterBedDTO payload, Authentication authentication) {
         User currentUser = userRepository.findByUsername(authentication.getName()).orElse(null);
@@ -51,8 +51,8 @@ public class BedController {
     @GetMapping("")
     @Operation(summary = "Obtener camas por piso", description = "Permite ver las camas del piso del usuario autenticado")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Camas encontradas exitosamente"),
-        @ApiResponse(responseCode = "403", description = "No tienes permisos para realizar esta acción")
+            @ApiResponse(responseCode = "200", description = "Camas encontradas exitosamente"),
+            @ApiResponse(responseCode = "403", description = "No tienes permisos para realizar esta acción")
     })
     public ResponseEntity<APIResponse> getBedsByFloor(Authentication authentication) {
         User currentUser = userRepository.findByUsername(authentication.getName()).orElse(null);
@@ -79,14 +79,30 @@ public class BedController {
         return new ResponseEntity<>(response, response.getStatus());
     }
 
+    @GetMapping("/available")
+    @Operation(summary = "Obtener camas disponibles", description = "Permite al rol de enfermera ver las camas libres de su piso")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Camas disponibles encontradas exitosamente"),
+            @ApiResponse(responseCode = "403", description = "No tienes permisos para realizar esta acción")
+    })
+    public ResponseEntity<APIResponse> getAvailableBeds(Authentication authentication) {
+        User currentUser = userRepository.findByUsername(authentication.getName()).orElse(null);
+        if (currentUser == null) {
+            APIResponse response = new APIResponse("Usuario no encontrado", false, org.springframework.http.HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(response, response.getStatus());
+        }
+
+        APIResponse response = bedService.getAvailableBeds(currentUser.getFloor().getId());
+        return new ResponseEntity<>(response, response.getStatus());
+    }
 
     @PostMapping("/assign")
     @Operation(summary = "Asignar cama a enfermera", description = "Permite a la secretaria asignar una cama a una enfermera de su piso")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Cama asignada exitosamente"),
-        @ApiResponse(responseCode = "400", description = "Cama ya asignada o datos inválidos"),
-        @ApiResponse(responseCode = "403", description = "No tienes permisos para realizar esta acción"),
-        @ApiResponse(responseCode = "404", description = "Enfermera o cama no encontrada")
+            @ApiResponse(responseCode = "200", description = "Cama asignada exitosamente"),
+            @ApiResponse(responseCode = "400", description = "Cama ya asignada o datos inválidos"),
+            @ApiResponse(responseCode = "403", description = "No tienes permisos para realizar esta acción"),
+            @ApiResponse(responseCode = "404", description = "Enfermera o cama no encontrada")
     })
     public ResponseEntity<APIResponse> assignBedToNurse(@Valid @RequestBody AssignBedDTO payload, Authentication authentication) {
         User currentUser = userRepository.findByUsername(authentication.getName()).orElse(null);
@@ -102,8 +118,8 @@ public class BedController {
     @GetMapping("/assigned")
     @Operation(summary = "Obtener camas asignadas", description = "Permite a la enfermera ver sus camas asignadas")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Camas asignadas encontradas exitosamente"),
-        @ApiResponse(responseCode = "403", description = "No tienes permisos para realizar esta acción")
+            @ApiResponse(responseCode = "200", description = "Camas asignadas encontradas exitosamente"),
+            @ApiResponse(responseCode = "403", description = "No tienes permisos para realizar esta acción")
     })
     public ResponseEntity<APIResponse> getAssignedBeds(Authentication authentication) {
         User currentUser = userRepository.findByUsername(authentication.getName()).orElse(null);

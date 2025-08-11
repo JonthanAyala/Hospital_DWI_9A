@@ -1,14 +1,23 @@
 package utez.edu.mx.hospitalback.modules.bed;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import lombok.Getter;
+import lombok.Setter;
 import utez.edu.mx.hospitalback.modules.floor.Floor;
 import utez.edu.mx.hospitalback.modules.patient.Patient;
+import utez.edu.mx.hospitalback.modules.userhasbeds.UserHasBeds;
+
+import java.util.List;
 
 @Entity
 @Table(name = "bed")
+@Getter
+@Setter
 public class Bed {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,59 +33,19 @@ public class Bed {
 
     @ManyToOne
     @JoinColumn(name = "id_floor", nullable = false)
+    @JsonManagedReference
     private Floor floor;
 
-    @OneToOne(mappedBy = "bed", cascade = CascadeType.ALL)
-    @JsonIgnore
+    // Relación OneToOne con Patient - Lado no dueño
+    @OneToOne
+    @JoinColumn(name = "id_patient", unique = true) // id_patient es la clave foránea en la tabla 'bed'
+    @JsonManagedReference
     private Patient patient;
 
+    @OneToMany(mappedBy = "bed")
+    @JsonIgnore
+    private List<UserHasBeds> userHasBeds;
+
     public Bed() {
-    }
-
-    public Bed(Long id, String identifier, Boolean isOccupied, Floor floor) {
-        this.id = id;
-        this.identifier = identifier;
-        this.isOccupied = isOccupied;
-        this.floor = floor;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
-    public Boolean getIsOccupied() {
-        return isOccupied;
-    }
-
-    public void setIsOccupied(Boolean isOccupied) {
-        this.isOccupied = isOccupied;
-    }
-
-    public Floor getFloor() {
-        return floor;
-    }
-
-    public void setFloor(Floor floor) {
-        this.floor = floor;
-    }
-
-    public Patient getPatient() {
-        return patient;
-    }
-
-    public void setPatient(Patient patient) {
-        this.patient = patient;
     }
 }
