@@ -11,11 +11,12 @@ import java.util.Optional;
 @Repository
 public interface PatientRepository extends JpaRepository<Patient, Long> {
     Optional<Patient> findByBedId(Long bedId);
-    
-    @Query("SELECT p FROM Patient p WHERE p.bed.id IN " +
-           "(SELECT uhb.bed.id FROM UserHasBeds uhb WHERE uhb.user.id = :userId)")
+
+    // Consulta corregida para usar la cláusula IN con una subconsulta.
+    // Esto es más seguro y a menudo resuelve errores de mapeo en tiempo de ejecución.
+    @Query("SELECT p FROM Patient p WHERE p.bed.id IN (SELECT uhb.bed.id FROM UserHasBeds uhb WHERE uhb.user.id = :userId)")
     List<Patient> findPatientsByNurseId(@Param("userId") Long userId);
-    
+
     @Query("SELECT p FROM Patient p WHERE p.bed.floor.id = :floorId")
     List<Patient> findPatientsByFloorId(@Param("floorId") Long floorId);
 }
