@@ -1,42 +1,40 @@
 package utez.edu.mx.hospitalback.utils;
 
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
+import javax.swing.*;
 
-/*
-* Configuration le dice a spring que esta clase va a a configurar algo
-* pero esta notacion requiere al menos de un metodo que retorne
-* dicha configuracion
-*
-* @Bean define el metodo que va a regresar dicha configuracion
-* */
 @Configuration
 public class DBConnection {
-    @Value("${db.url}")
-    private String DB_URL;
-    @Value("${db.password}")
-    private String DB_PASSWORD;
+
+    @Value("${db.host}")
+    private String host;
+
+    @Value("${db.port}")
+    private String port;
+
+    @Value("${db.name}")
+    private String name;
+
     @Value("${db.username}")
-    private String DB_USERNAME;
+    private String username;
+
+    @Value("${db.password}")
+    private String password;
 
     @Bean
     public DataSource getConnection() {
-        try {
-            DriverManagerDataSource configuration = new DriverManagerDataSource();
-            configuration.setUrl(DB_URL);
-            configuration.setUsername(DB_USERNAME);
-            configuration.setPassword(DB_PASSWORD);
-            configuration.setDriverClassName("com.mysql.cj.jdbc.Driver");
-            return configuration;
-        }catch (Exception e) {
-            System.out.println("Error de conexion a base de datos");
-            e.printStackTrace();
-            return null;
-        }
+        DriverManagerDataSource conf = new DriverManagerDataSource();
+        conf.setDriverClassName("com.mysql.jdbc.Driver");
+        conf.setUrl("jdbc:mysql://" + host + ":" + port + "/" + name);
+        conf.setUsername(username);
+        conf.setPassword(password);
+
+        return conf;
     }
 }
-
