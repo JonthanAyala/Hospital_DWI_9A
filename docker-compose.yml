@@ -1,0 +1,45 @@
+services:
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hospital_9a
+    networks:
+      - hospital9a-test
+    volumes:
+      - mysql9A-data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+
+  backend:
+    build: 
+      context: ./Back/hospital-back
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: hospital_9a
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    ports:
+      - "8080:8080"
+    networks:
+      - hospital9a-test
+    depends_on:
+      - mysql
+
+  frontend:
+    build: 
+      context: ./Front/hospital-front
+    ports:
+      - "3000:80"
+    networks:
+      - hospital9a-test
+    depends_on:
+      - backend
+
+volumes:
+  mysql9A-data:
+
+networks:
+  hospital9a-test:
+    external: true
